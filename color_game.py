@@ -102,24 +102,25 @@ class Colors(IconScoreBase):
         main_bet_amount = yellow + white + pink + blue + red + green
         side_bet_amount = s_yellow + s_white + s_pink + s_blue + s_red + s_green
         total_bet_amount = main_bet_amount + side_bet_amount
+        main_bet_win = False
+        side_bet_win = False
         side_bet_set = False
         if not self._game_on.get():
             Logger.debug(f'Game not active yet.', TAG)
             revert(f'Game not active yet.')
-        if not (BET_MIN <= yellow <= main_bet_limit and BET_MIN <= white <= main_bet_limit and BET_MIN <= pink <= main_bet_limit and
-                BET_MIN <= blue <= main_bet_limit and BET_MIN <= red <= main_bet_limit and BET_MIN <= green <= main_bet_limit):
+        if not (0 <= yellow <= main_bet_limit and 0 <= white <= main_bet_limit and
+                0 <= pink <= main_bet_limit and 0 <= blue <= main_bet_limit and
+                0 <= red <= main_bet_limit and 0 <= green <= main_bet_limit):
             Logger.debug(f'Bets placed out of range numbers', TAG)
             revert(f'Invalid main bet. Choose a number between 0 to 100')
-        if not (BET_MIN <= s_yellow <= side_bet_limit and BET_MIN <= s_white <= side_bet_limit and BET_MIN <= s_pink <= side_bet_limit and
-                BET_MIN <= s_blue <= side_bet_limit and BET_MIN <= s_red <= side_bet_limit and BET_MIN <= s_green <= side_bet_limit):
+        if not (0 <= s_yellow <= side_bet_limit and 0 <= s_white <= side_bet_limit and
+                0 <= s_pink <= side_bet_limit and 0 <= s_blue <= side_bet_limit and
+                0 <= s_red <= side_bet_limit and 0 <= s_green <= side_bet_limit):
             Logger.debug(f'Bets placed out of range numbers', TAG)
             revert(f'Invalid side bet. Choose a number between 0 to 10')
         if not (BET_MIN <= main_bet_amount <= main_bet_limit):
             Logger.debug(f'Betting amount {main_bet_amount} out of range.', TAG)
-            revert(f'Betting amount {main_bet_amount} out of range ({BET_MIN} ,{main_bet_limit}).')
-        if not (BET_MIN <= side_bet_amount <= side_bet_limit):
-            Logger.debug(f'Betting amount {side_bet_amount} out of range.', TAG)
-            revert(f'Betting amount {side_bet_amount} out of range ({BET_MIN} ,{side_bet_limit}).')
+            revert(f'Main bet amount {main_bet_amount} out of range ({BET_MIN} ,{main_bet_limit}).')
         if not main_bet_amount == (self.msg.value - side_bet_amount):
             Logger.debug(f'Invalid bet. Main bet value must equal Main bet amount', TAG)
             revert(f'Main Bet amount {main_bet_amount} doesnt equal Main bet Value {self.msg.value - side_bet_amount} ')
@@ -134,6 +135,9 @@ class Colors(IconScoreBase):
             if side_bet_type not in SIDE_BET_TYPES:
                 Logger.debug(f'Invalid side bet type', TAG)
                 revert(f'Invalid side bet type.')
+            if not (BET_MIN <= side_bet_amount <= side_bet_limit):
+                Logger.debug(f'Betting amount {side_bet_amount} out of range.', TAG)
+                revert(f'Side bet amount {side_bet_amount} out of range ({BET_MIN} ,{side_bet_limit}).')
 
         # execute rolls
         colors = ['Y', 'W', 'P', 'B', 'R', 'G']
@@ -159,7 +163,8 @@ class Colors(IconScoreBase):
             for k in results:
                 if j == k:
                     color_count += 1
-            m_payout += user_main[j] + (color_count * user_main[j])
+            if color_count != 0:
+                m_payout += user_main[j] + (color_count * user_main[j])
         if m_payout > 0:
             main_bet_win = True
         else:
