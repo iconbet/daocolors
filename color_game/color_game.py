@@ -84,6 +84,8 @@ class Colors(IconScoreBase):
 
     def get_random(self, user_seed: str = '') -> int:
         Logger.debug(f'Entered get_random.', TAG)
+        if self.msg.sender.is_contract:
+            revert("ICONbet: SCORE cant play games")
         seed = (str(bytes.hex(self.tx.hash)) + str(self.now()) + user_seed)
         spin = int.from_bytes(sha3_256(seed.encode()), "big")
         Logger.debug(f'Result of the spin was {spin}.', TAG)
